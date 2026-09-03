@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BarChart3, FileOutput, LayoutDashboard, Moon, Plus, Sun, PanelsTopLeft } from "lucide-react";
+import { BarChart3, FileOutput, LayoutDashboard, Moon, Plus, ServerCog, Sun, PanelsTopLeft } from "lucide-react";
 import Dashboard from "./Dashboard";
 import Charts from "./Charts";
 import TaskForm from "./TaskForm";
@@ -8,6 +8,7 @@ import Reports from "./Reports";
 import Kanban, { DEFAULT_COLUMNS } from "./Kanban";
 import Backlog from "./Backlog";
 import BoardList from "./BoardList";
+import McpSettings from "./McpSettings";
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
     const [selectedBoardId, setSelectedBoardId] = useState("default-board");
     const [isAddingColumn, setIsAddingColumn] = useState(false);
     const [isAddingIssue, setIsAddingIssue] = useState(false);
+    const [mcpServers, setMcpServers] = useState([]);
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -29,6 +31,7 @@ function App() {
             setTasks(parsed.tasks || []);
             setActiveTask(parsed.activeTask || null);
             setDarkMode(parsed.darkMode || false);
+            setMcpServers(parsed.mcpServers || []);
             const rawBoards = parsed.boards?.length ? parsed.boards : [{
                 id: "default-board",
                 name: "My board",
@@ -50,13 +53,13 @@ function App() {
             return;
         }
 
-        const backup = { tasks, activeTask, darkMode, boards, backedUpAt: new Date().toISOString() };
+        const backup = { tasks, activeTask, darkMode, boards, mcpServers, backedUpAt: new Date().toISOString() };
         localStorage.setItem(
             STORAGE_KEY,
             JSON.stringify(backup)
         );
         localStorage.setItem("tracker_v2_backup", JSON.stringify(backup));
-    }, [tasks, activeTask, darkMode, boards, isHydrated]);
+    }, [tasks, activeTask, darkMode, boards, mcpServers, isHydrated]);
 
     const selectedBoard = boards.find(board => board.id === selectedBoardId);
     const setBoardItems = updater => setBoards(currentBoards => currentBoards.map(board => board.id === selectedBoardId ? { ...board, items: typeof updater === "function" ? updater(board.items) : updater } : board));
@@ -85,6 +88,7 @@ function App() {
         }));
     };
     const deleteBacklogIssue = (boardId, issueId) => setBoards(currentBoards => currentBoards.map(board => board.id === boardId ? { ...board, items: board.items.filter(item => item.id !== issueId) } : board));
+    const saveMcpServer = server => setMcpServers(currentServers => currentServers.some(current => current.id === server.id) ? currentServers.map(current => current.id === server.id ? server : current) : [...currentServers, server]);
     const boardIssues = boards.flatMap(board => board.items.filter(item => item.status).map(item => ({ ...item, boardId: board.id, boardName: board.name })));
     const startKanbanIssue = issue => setBoards(currentBoards => currentBoards.map(board => {
         if (board.id !== issue.boardId) return board;
@@ -107,13 +111,14 @@ function App() {
                         </div>
                         <button className={activeView === "reports" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("reports")}><FileOutput size={19} /> Export reports</button>
                         <button className={activeView === "graphics" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("graphics")}><BarChart3 size={19} /> Graphics</button>
+                        <button className={activeView === "mcp" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("mcp")}><ServerCog size={19} /> MCP configuration</button>
                     </nav>
                 </aside>
                 <main className="app-content">
                     <header className="app-header">
                         <div>
                             <p className="eyebrow">PERSONAL TIMESHEET</p>
-                            <h1>{activeView === "overview" ? "Engineering Productivity Tracker" : activeView === "backlog" ? "Issue Backlog" : activeView === "boards" ? "Project Boards" : activeView === "kanban" ? selectedBoard?.name || "Project Board" : activeView === "reports" ? "Export Reports" : "Productivity Graphics"}</h1>
+                            <h1>{activeView === "overview" ? "Engineering Productivity Tracker" : activeView === "backlog" ? "Issue Backlog" : activeView === "boards" ? "Project Boards" : activeView === "kanban" ? selectedBoard?.name || "Project Board" : activeView === "reports" ? "Export Reports" : activeView === "mcp" ? "MCP Configuration" : "Productivity Graphics"}</h1>
                         </div>
                         <div className="header-actions"><button className="icon-button" onClick={() => setDarkMode(currentMode => !currentMode)} title={darkMode ? "Use light mode" : "Use dark mode"} aria-label={darkMode ? "Use light mode" : "Use dark mode"}>{darkMode ? <Sun size={19} /> : <Moon size={19} />}</button>{activeView === "kanban" && <div className="board-header-actions"><button className="secondary-button add-status-button" onClick={() => setIsAddingColumn(true)}><Plus size={17} /> Add status</button><button className="secondary-button add-status-button" onClick={() => setIsAddingIssue(true)}><Plus size={17} /> Add issue</button></div>}</div>
                     </header>
@@ -124,6 +129,7 @@ function App() {
                     </section>}
                     {activeView === "reports" && <Reports tasks={tasks} />}
                     {activeView === "graphics" && <section className="graphics-view"><Dashboard tasks={tasks} /><Charts tasks={tasks} /></section>}
+                    {activeView === "mcp" && <McpSettings servers={mcpServers} onSave={saveMcpServer} onDelete={serverId => setMcpServers(currentServers => currentServers.filter(server => server.id !== serverId))} />}
                     {activeView === "boards" && <BoardList boards={boards} onCreate={createBoard} onOpen={openBoard} onDelete={deleteBoard} onRename={renameBoard} />}
                     {activeView === "backlog" && <Backlog boards={boards} onCreateIssue={createBacklogIssue} onUpdateIssue={updateBacklogIssue} onDeleteIssue={deleteBacklogIssue} />}
                     {activeView === "kanban" && selectedBoard && <Kanban boardItems={selectedBoard.items} setBoardItems={setBoardItems} boardColumns={selectedBoard.columns} setBoardColumns={setBoardColumns} isAddingColumn={isAddingColumn} setIsAddingColumn={setIsAddingColumn} isAddingIssue={isAddingIssue} setIsAddingIssue={setIsAddingIssue} />}
