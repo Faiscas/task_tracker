@@ -1,6 +1,6 @@
 import { Download, FileSpreadsheet, Printer } from "lucide-react";
-import { exportCSV } from "./csvExport";
-import { exportExcel } from "./ExcelExport";
+import { exportCSV } from "../services/csvExport";
+import { exportExcel } from "../services/ExcelExport";
 
 export default function Reports({ tasks }) {
     const currentMonth = new Date().toISOString().slice(0, 7);

@@ -10,7 +10,7 @@
         "desktop": "electron .",
         "package:win": "npm run build && electron-builder --win nsis"
     },
-    "main": "electron-main.cjs",
+    "main": "electron/electron-main.cjs",
     "build": {
         "appId": "com.criticalsoftware.engineeringtracker",
         "productName": "Engineering Productivity Tracker",
@@ -19,8 +19,9 @@
         },
         "files": [
             "dist/**/*",
-            "electron-main.cjs",
-            "electron-preload.cjs",
+            "electron/**/*",
+            "components/**/*",
+            "services/**/*",
             "package.json"
         ],
         "win": {

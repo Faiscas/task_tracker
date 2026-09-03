@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { BarChart3, FileOutput, LayoutDashboard, Moon, Plus, ServerCog, Sun, PanelsTopLeft } from "lucide-react";
-import Dashboard from "./Dashboard";
-import Charts from "./Charts";
-import TaskForm from "./TaskForm";
-import TaskTable from "./TaskTable";
-import Reports from "./Reports";
-import Kanban, { DEFAULT_COLUMNS } from "./Kanban";
-import Backlog from "./Backlog";
-import BoardList from "./BoardList";
-import McpSettings from "./McpSettings";
+import Dashboard from "./components/Dashboard";
+import Charts from "./components/Charts";
+import TaskForm from "./components/TaskForm";
+import TaskTable from "./components/TaskTable";
+import Reports from "./components/Reports";
+import Kanban, { DEFAULT_COLUMNS } from "./components/Kanban";
+import Backlog from "./components/Backlog";
+import BoardList from "./components/BoardList";
+import McpSettings from "./components/McpSettings";
 
 
 function App() {
