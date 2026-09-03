@@ -577,9 +577,10 @@ h2 {
 
 .task-form {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    padding: 22px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 18px;
+    padding: 28px;
 }
 
 .overview-page {
@@ -616,9 +617,9 @@ h2 {
 
 .issue-selector {
     display: grid;
-    grid-column: span 2;
+    grid-column: auto;
     gap: 6px;
-    min-width: min(100%, 360px);
+    min-width: 0;
     color: var(--text);
     font-weight: 700;
 }
@@ -1165,7 +1166,7 @@ tr th {
 
 .timesheet-entries article {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto 38px;
+    grid-template-columns: minmax(0, 1fr) auto auto 38px 38px;
     align-items: center;
     gap: 14px;
     padding: 11px;
@@ -1573,4 +1574,14 @@ tr th {
 
 .priority-very-high {
     color: #c23c42;
+}
+
+.task-form>.empty-state {
+    grid-column: 1 / -1;
+    padding-top: 2px;
+}
+
+.task-form>.primary-button {
+    min-width: 180px;
+    min-height: 52px;
 }
