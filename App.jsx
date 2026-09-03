@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BarChart3, FileOutput, LayoutDashboard, Moon, Plus, ServerCog, Sun, PanelsTopLeft } from "lucide-react";
+import { BarChart3, Clock3, Database, FileOutput, LayoutDashboard, Moon, Plus, ServerCog, Sun, PanelsTopLeft } from "lucide-react";
 import Dashboard from "./components/Dashboard";
 import Charts from "./components/Charts";
 import TaskForm from "./components/TaskForm";
@@ -9,6 +9,8 @@ import Kanban, { DEFAULT_COLUMNS } from "./components/Kanban";
 import Backlog from "./components/Backlog";
 import BoardList from "./components/BoardList";
 import McpSettings from "./components/McpSettings";
+import Timesheet from "./components/Timesheet";
+import DataTools from "./components/DataTools";
 
 
 function App() {
@@ -88,6 +90,14 @@ function App() {
         }));
     };
     const deleteBacklogIssue = (boardId, issueId) => setBoards(currentBoards => currentBoards.map(board => board.id === boardId ? { ...board, items: board.items.filter(item => item.id !== issueId) } : board));
+    const restoreData = backup => {
+        if (!Array.isArray(backup.tasks) || !Array.isArray(backup.boards)) return window.alert("The backup does not contain tracker data.");
+        setTasks(backup.tasks);
+        setBoards(backup.boards);
+        setMcpServers(backup.mcpServers || []);
+        setDarkMode(Boolean(backup.darkMode));
+        setSelectedBoardId(backup.boards[0]?.id || "");
+    };
     const saveMcpServer = server => setMcpServers(currentServers => currentServers.some(current => current.id === server.id) ? currentServers.map(current => current.id === server.id ? server : current) : [...currentServers, server]);
     const boardIssues = boards.flatMap(board => board.items.filter(item => item.status).map(item => ({ ...item, boardId: board.id, boardName: board.name })));
     const startKanbanIssue = issue => setBoards(currentBoards => currentBoards.map(board => {
@@ -105,6 +115,7 @@ function App() {
                     <div className="brand-mark">ET</div>
                     <nav aria-label="Main navigation">
                         <button className={activeView === "overview" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("overview")}><LayoutDashboard size={19} /> Overview</button>
+                        <button className={activeView === "timesheet" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("timesheet")}><Clock3 size={19} /> Timesheet</button>
                         <div className="kanban-nav-group">
                             <button className={activeView === "kanban" || activeView === "backlog" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("kanban")}><PanelsTopLeft size={19} /> Kanban</button>
                             <div className="kanban-subnav"><button onClick={() => setActiveView("backlog")}>Backlog</button><button onClick={() => setActiveView("boards")}>Boards</button></div>
@@ -112,13 +123,14 @@ function App() {
                         <button className={activeView === "reports" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("reports")}><FileOutput size={19} /> Export reports</button>
                         <button className={activeView === "graphics" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("graphics")}><BarChart3 size={19} /> Graphics</button>
                         <button className={activeView === "mcp" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("mcp")}><ServerCog size={19} /> MCP configuration</button>
+                        <button className={activeView === "data" ? "nav-item active" : "nav-item"} onClick={() => setActiveView("data")}><Database size={19} /> Backup & restore</button>
                     </nav>
                 </aside>
                 <main className="app-content">
                     <header className="app-header">
                         <div>
                             <p className="eyebrow">PERSONAL TIMESHEET</p>
-                            <h1>{activeView === "overview" ? "Engineering Productivity Tracker" : activeView === "backlog" ? "Issue Backlog" : activeView === "boards" ? "Project Boards" : activeView === "kanban" ? selectedBoard?.name || "Project Board" : activeView === "reports" ? "Export Reports" : activeView === "mcp" ? "MCP Configuration" : "Productivity Graphics"}</h1>
+                            <h1>{activeView === "overview" ? "Engineering Productivity Tracker" : activeView === "timesheet" ? "Daily Timesheet" : activeView === "data" ? "Backup & Restore" : activeView === "backlog" ? "Issue Backlog" : activeView === "boards" ? "Project Boards" : activeView === "kanban" ? selectedBoard?.name || "Project Board" : activeView === "reports" ? "Export Reports" : activeView === "mcp" ? "MCP Configuration" : "Productivity Graphics"}</h1>
                         </div>
                         <div className="header-actions"><button className="icon-button" onClick={() => setDarkMode(currentMode => !currentMode)} title={darkMode ? "Use light mode" : "Use dark mode"} aria-label={darkMode ? "Use light mode" : "Use dark mode"}>{darkMode ? <Sun size={19} /> : <Moon size={19} />}</button>{activeView === "kanban" && <div className="board-header-actions"><button className="secondary-button add-status-button" onClick={() => setIsAddingColumn(true)}><Plus size={17} /> Add status</button><button className="secondary-button add-status-button" onClick={() => setIsAddingIssue(true)}><Plus size={17} /> Add issue</button></div>}</div>
                     </header>
@@ -128,6 +140,8 @@ function App() {
                         <TaskTable tasks={tasks} setTasks={setTasks} />
                     </section>}
                     {activeView === "reports" && <Reports tasks={tasks} />}
+                    {activeView === "timesheet" && <Timesheet tasks={tasks} setTasks={setTasks} />}
+                    {activeView === "data" && <DataTools data={{ tasks, boards, mcpServers, darkMode }} onRestore={restoreData} />}
                     {activeView === "graphics" && <section className="graphics-view"><Dashboard tasks={tasks} /><Charts tasks={tasks} /></section>}
                     {activeView === "mcp" && <McpSettings servers={mcpServers} onSave={saveMcpServer} onDelete={serverId => setMcpServers(currentServers => currentServers.filter(server => server.id !== serverId))} />}
                     {activeView === "boards" && <BoardList boards={boards} onCreate={createBoard} onOpen={openBoard} onDelete={deleteBoard} onRename={renameBoard} />}

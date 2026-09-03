@@ -44,7 +44,8 @@ export default function Kanban({ boardItems, setBoardItems, boardColumns, setBoa
     const moveItem = (event, status) => {
         event.preventDefault();
         const itemId = event.dataTransfer.getData("text/plain");
-        setBoardItems(items => items.map(item => item.id === itemId ? { ...item, status } : item));
+        const statusLabel = columns.find(column => column.id === status)?.label || status;
+        setBoardItems(items => items.map(item => item.id === itemId ? { ...item, status, activity: [...(item.activity || []), { id: crypto.randomUUID(), text: `Moved to ${statusLabel}`, createdAt: new Date().toISOString() }] } : item));
     };
 
     const moveColumn = (event, targetId) => {
@@ -103,7 +104,7 @@ export default function Kanban({ boardItems, setBoardItems, boardColumns, setBoa
                         const priority = PRIORITY_ICONS[item.priority || "Medium"];
                         const PriorityIcon = priority.Icon;
                         return <article className="kanban-card" key={item.id} draggable onClick={() => setSelectedIssue(item)} onDragStart={event => { event.stopPropagation(); event.dataTransfer.setData("text/plain", item.id); }}>
-                            <div className="ticket-content"><strong>{item.title}</strong>{labels.length > 0 && <span className="ticket-tags">{labels.map(ticketLabel => <span className="board-label" key={ticketLabel.name} style={{ "--label-color": ticketLabel.color }}>{ticketLabel.name}</span>)}</span>}</div>
+                            <div className="ticket-content"><strong>{item.title}</strong>{labels.length > 0 && <span className="ticket-tags">{labels.map(ticketLabel => <span className="board-label" key={ticketLabel.name} style={{ "--label-color": ticketLabel.color }}>{ticketLabel.name}</span>)}</span>}{item.dueDate && <small className={new Date(`${item.dueDate}T00:00:00`) < new Date() ? "due-date overdue" : "due-date"}>Due {new Date(`${item.dueDate}T00:00:00`).toLocaleDateString()}</small>}</div>
                             <span className={`priority-icon ${priority.className}`} title={`${item.priority || "Medium"} priority`} aria-label={`${item.priority || "Medium"} priority`}><PriorityIcon size={18} /></span>
                             {label && <span className="ticket-accent" style={{ backgroundColor: label.color }} aria-hidden="true" />}
                         </article>;
