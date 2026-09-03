@@ -1,0 +1,43 @@
+{
+    "name": "task-tracker",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "desktop": "electron .",
+        "package:win": "npm run build && electron-builder --win nsis"
+    },
+    "main": "electron-main.cjs",
+    "build": {
+        "appId": "com.criticalsoftware.engineeringtracker",
+        "productName": "Engineering Productivity Tracker",
+        "directories": {
+            "output": "release"
+        },
+        "files": [
+            "dist/**/*",
+            "electron-main.cjs",
+            "package.json"
+        ],
+        "win": {
+            "target": "nsis"
+        }
+    },
+    "dependencies": {
+        "file-saver": "latest",
+        "lucide-react": "latest",
+        "react": "latest",
+        "react-dom": "latest",
+        "recharts": "latest",
+        "xlsx": "latest"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-react": "latest",
+        "electron": "^44.1.1",
+        "electron-builder": "^26.15.3",
+        "vite": "latest"
+    }
+}

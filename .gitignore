@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Generated web and Electron builds
+dist/
+release/
+
+# Electron-builder metadata
+*.blockmap
+builder-effective-config.yaml
+
+# Local environment and editor files
+.env
+.env.*
+.vscode/
