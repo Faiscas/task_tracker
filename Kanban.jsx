@@ -1,4 +1,4 @@
-import { GripVertical, Pencil, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronsUp, GripVertical, Minus, Pencil, X } from "lucide-react";
 import { useState } from "react";
 import IssueModal from "./IssueModal";
 
@@ -9,8 +9,14 @@ export const DEFAULT_COLUMNS = [
 ];
 
 const EMPTY_COLUMN = { id: "", label: "", color: "#0969da" };
+const PRIORITY_ICONS = {
+    Low: { Icon: ArrowDown, className: "priority-low" },
+    Medium: { Icon: Minus, className: "priority-medium" },
+    High: { Icon: ArrowUp, className: "priority-high" },
+    "Very high": { Icon: ChevronsUp, className: "priority-very-high" },
+};
 
-export default function Kanban({ boardItems, setBoardItems, boardColumns, setBoardColumns, isAddingColumn, setIsAddingColumn }) {
+export default function Kanban({ boardItems, setBoardItems, boardColumns, setBoardColumns, isAddingColumn, setIsAddingColumn, isAddingIssue, setIsAddingIssue }) {
     const [selectedIssue, setSelectedIssue] = useState(null);
     const [columnEditor, setColumnEditor] = useState(null);
     const [columnForm, setColumnForm] = useState(EMPTY_COLUMN);
@@ -63,7 +69,11 @@ export default function Kanban({ boardItems, setBoardItems, boardColumns, setBoa
 
     const saveIssue = issue => {
         setBoardItems(items => items.map(item => item.id === issue.id ? issue : item));
-        setSelectedIssue(null);
+        setSelectedIssue(issue);
+    };
+    const createIssue = issue => {
+        setBoardItems(items => [...items, { ...issue, id: crypto.randomUUID(), status: columns[0]?.id || "todo" }]);
+        setIsAddingIssue(false);
     };
 
     return <>
@@ -88,9 +98,13 @@ export default function Kanban({ boardItems, setBoardItems, boardColumns, setBoa
                         <button className="column-edit-button" onClick={() => { setColumnForm(column); setColumnEditor(column.id); }} title={`Edit ${column.label}`} aria-label={`Edit ${column.label}`}><Pencil size={15} /></button>
                     </header>
                     <div className="kanban-cards">{columnItems.map(item => {
-                        const label = item.labels?.[0];
+                        const labels = item.labels || [];
+                        const label = labels[0];
+                        const priority = PRIORITY_ICONS[item.priority || "Medium"];
+                        const PriorityIcon = priority.Icon;
                         return <article className="kanban-card" key={item.id} draggable onClick={() => setSelectedIssue(item)} onDragStart={event => { event.stopPropagation(); event.dataTransfer.setData("text/plain", item.id); }}>
-                            <div className="ticket-content"><strong>{item.title}</strong>{label && <span className="board-label" style={{ "--label-color": label.color }}>{label.name}</span>}</div>
+                            <div className="ticket-content"><strong>{item.title}</strong>{labels.length > 0 && <span className="ticket-tags">{labels.map(ticketLabel => <span className="board-label" key={ticketLabel.name} style={{ "--label-color": ticketLabel.color }}>{ticketLabel.name}</span>)}</span>}</div>
+                            <span className={`priority-icon ${priority.className}`} title={`${item.priority || "Medium"} priority`} aria-label={`${item.priority || "Medium"} priority`}><PriorityIcon size={18} /></span>
                             {label && <span className="ticket-accent" style={{ backgroundColor: label.color }} aria-hidden="true" />}
                         </article>;
                     })}</div>
@@ -104,6 +118,7 @@ export default function Kanban({ boardItems, setBoardItems, boardColumns, setBoa
             <label>Colour<input className="color-input" type="color" value={columnForm.color} onChange={event => setColumnForm({ ...columnForm, color: event.target.value })} /></label>
             <footer><button className="secondary-button" type="button" onClick={closeColumnEditor}>Cancel</button><button className="primary-button" type="submit">Save status</button></footer>
         </form></div>}
+        {isAddingIssue && <IssueModal issue={null} onClose={() => setIsAddingIssue(false)} onSave={createIssue} onDelete={() => {}} />}
         {selectedIssue && <IssueModal issue={selectedIssue} onClose={() => setSelectedIssue(null)} onSave={saveIssue} onDelete={id => { setBoardItems(items => items.filter(item => item.id !== id)); setSelectedIssue(null); }} />}
     </>;
 }

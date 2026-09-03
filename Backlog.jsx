@@ -11,7 +11,7 @@ export default function Backlog({ boards, onCreateIssue, onUpdateIssue, onDelete
     const saveIssue = issue => {
         if (selectedIssue) onUpdateIssue(selectedIssue.boardId, issue.boardId, issue);
         else onCreateIssue(issue.boardId || boards[0]?.id, issue);
-        setCreating(false); setSelectedIssue(undefined);
+        setCreating(false); setSelectedIssue(selectedIssue ? { ...issue, boardId: issue.boardId || selectedIssue.boardId, boardName: issue.boardName || selectedIssue.boardName } : undefined);
     };
 
     return <section className="backlog-view"><header className="backlog-header"><div><p className="eyebrow">ISSUE BACKLOG</p><h2>Plan work before it reaches the board</h2></div><button className="primary-button" onClick={() => setCreating(true)}><Plus size={17} /> Add issue</button></header>

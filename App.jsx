@@ -20,6 +20,7 @@ function App() {
     const [boards, setBoards] = useState([{ id: "default-board", name: "My board", items: [], columns: DEFAULT_COLUMNS }]);
     const [selectedBoardId, setSelectedBoardId] = useState("default-board");
     const [isAddingColumn, setIsAddingColumn] = useState(false);
+    const [isAddingIssue, setIsAddingIssue] = useState(false);
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -114,7 +115,7 @@ function App() {
                             <p className="eyebrow">PERSONAL TIMESHEET</p>
                             <h1>{activeView === "overview" ? "Engineering Productivity Tracker" : activeView === "backlog" ? "Issue Backlog" : activeView === "boards" ? "Project Boards" : activeView === "kanban" ? selectedBoard?.name || "Project Board" : activeView === "reports" ? "Export Reports" : "Productivity Graphics"}</h1>
                         </div>
-                        <div className="header-actions"><button className="icon-button" onClick={() => setDarkMode(currentMode => !currentMode)} title={darkMode ? "Use light mode" : "Use dark mode"} aria-label={darkMode ? "Use light mode" : "Use dark mode"}>{darkMode ? <Sun size={19} /> : <Moon size={19} />}</button>{activeView === "kanban" && <button className="secondary-button add-status-button" onClick={() => setIsAddingColumn(true)}><Plus size={17} /> Add status</button>}</div>
+                        <div className="header-actions"><button className="icon-button" onClick={() => setDarkMode(currentMode => !currentMode)} title={darkMode ? "Use light mode" : "Use dark mode"} aria-label={darkMode ? "Use light mode" : "Use dark mode"}>{darkMode ? <Sun size={19} /> : <Moon size={19} />}</button>{activeView === "kanban" && <div className="board-header-actions"><button className="secondary-button add-status-button" onClick={() => setIsAddingColumn(true)}><Plus size={17} /> Add status</button><button className="secondary-button add-status-button" onClick={() => setIsAddingIssue(true)}><Plus size={17} /> Add issue</button></div>}</div>
                     </header>
                     {activeView === "overview" && <section className="overview-page">
                         <TaskForm activeTask={activeTask} setActiveTask={setActiveTask} setTasks={setTasks} boardIssues={boardIssues} onStartIssue={startKanbanIssue} />
@@ -125,7 +126,7 @@ function App() {
                     {activeView === "graphics" && <section className="graphics-view"><Dashboard tasks={tasks} /><Charts tasks={tasks} /></section>}
                     {activeView === "boards" && <BoardList boards={boards} onCreate={createBoard} onOpen={openBoard} onDelete={deleteBoard} onRename={renameBoard} />}
                     {activeView === "backlog" && <Backlog boards={boards} onCreateIssue={createBacklogIssue} onUpdateIssue={updateBacklogIssue} onDeleteIssue={deleteBacklogIssue} />}
-                    {activeView === "kanban" && selectedBoard && <Kanban boardItems={selectedBoard.items} setBoardItems={setBoardItems} boardColumns={selectedBoard.columns} setBoardColumns={setBoardColumns} isAddingColumn={isAddingColumn} setIsAddingColumn={setIsAddingColumn} />}
+                    {activeView === "kanban" && selectedBoard && <Kanban boardItems={selectedBoard.items} setBoardItems={setBoardItems} boardColumns={selectedBoard.columns} setBoardColumns={setBoardColumns} isAddingColumn={isAddingColumn} setIsAddingColumn={setIsAddingColumn} isAddingIssue={isAddingIssue} setIsAddingIssue={setIsAddingIssue} />}
                 </main>
             </div>
         </div>
